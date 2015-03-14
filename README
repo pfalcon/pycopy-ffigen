@@ -1,5 +1,5 @@
 micropython-ffigen is experimental tool to generare external library bindings
-for ffi/sstruct modules of MicroPython https://github.com/micropython/micropython
+for ffi/uctypes modules of MicroPython https://github.com/micropython/micropython
 from C header files.
 
 micropython-ffigen depens on c2ffi tool (https://github.com/rpav/c2ffi),

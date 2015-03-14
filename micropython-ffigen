@@ -15,15 +15,15 @@ FFI_TYPE_MAP = {
     "ssize_t": "l",
 }
 
-SSTRUCT_TYPE_MAP = {
-    ":void": "sstruct.VOID",
-    ":unsigned-char": "sstruct.UINT8",
-    ":short": "sstruct.INT16",
-    ":int": "sstruct.INT32",
-    ":unsigned-int": "sstruct.UINT32",
-    ":enum": "sstruct.INT32",
-    "uint8_t": "sstruct.UINT8",
-    "uint16_t": "sstruct.UINT16",
+UCTYPES_TYPE_MAP = {
+    ":void": "uctypes.VOID",
+    ":unsigned-char": "uctypes.UINT8",
+    ":short": "uctypes.INT16",
+    ":int": "uctypes.INT32",
+    ":unsigned-int": "uctypes.UINT32",
+    ":enum": "uctypes.INT32",
+    "uint8_t": "uctypes.UINT8",
+    "uint16_t": "uctypes.UINT16",
 }
 
 def conv_ffi_type(rec):
@@ -33,20 +33,20 @@ def conv_ffi_type(rec):
         return FFI_TYPE_MAP[rec["tag"]]
     assert 0, rec["tag"]
 
-def conv_sstruct_type(rec, offset):
-    if rec["tag"] in SSTRUCT_TYPE_MAP:
-        v = SSTRUCT_TYPE_MAP[rec["tag"]]
+def conv_uctypes_type(rec, offset):
+    if rec["tag"] in UCTYPES_TYPE_MAP:
+        v = UCTYPES_TYPE_MAP[rec["tag"]]
         if "%d" in v:
             return v % offset
         else:
             return "%s | %d" % (v, offset)
     if rec["tag"] == ":pointer":
         if rec["type"]["tag"] == ":struct":
-            return "(sstruct.PTR | %d, %s)" % (offset, rec["type"]["name"])
+            return "(uctypes.PTR | %d, %s)" % (offset, rec["type"]["name"])
         else:
-            if rec["type"]["tag"] not in SSTRUCT_TYPE_MAP:
+            if rec["type"]["tag"] not in UCTYPES_TYPE_MAP:
                 assert 0, rec
-            return "(sstruct.PTR | %d, %s)" % (offset, SSTRUCT_TYPE_MAP[rec["type"]["tag"]])
+            return "(uctypes.PTR | %d, %s)" % (offset, UCTYPES_TYPE_MAP[rec["type"]["tag"]])
     assert 0, rec["tag"]
 
 
@@ -54,7 +54,7 @@ f = open(sys.argv[1])
 data = json.load(f)
 
 print("import ffi")
-print("import sstruct")
+print("import uctypes")
 print()
 print('l = ffi.open("libusb-1.0.so.0")')
 print()
@@ -77,7 +77,7 @@ for desc in data:
     elif desc["tag"] == "struct":
         print("%s = {" % desc["name"])
         for f in desc["fields"]:
-            print('    "%s": %s,' % (f["name"], conv_sstruct_type(f["type"], f["bit-offset"] / 8)))
+            print('    "%s": %s,' % (f["name"], conv_uctypes_type(f["type"], f["bit-offset"] / 8)))
 #            print(f)
         if desc["bit-size"] != 0:
             # This doesn't have to be true due to alignment
@@ -88,11 +88,11 @@ for desc in data:
     elif desc["tag"] == "typedef":
         if desc["type"]["tag"] == ":struct":
             FFI_TYPE_MAP[desc["name"]] = desc["type"]["name"]
-            SSTRUCT_TYPE_MAP[desc["name"]] = desc["type"]["name"]
+            UCTYPES_TYPE_MAP[desc["name"]] = desc["type"]["name"]
             print("# typedef %s" % desc["name"])
         elif desc["type"]["tag"] == ":function-pointer":
             FFI_TYPE_MAP[desc["name"]] = "C"
-            SSTRUCT_TYPE_MAP[desc["name"]] = "(sstruct.PTR | %d, sstruct.VOID)"
+            UCTYPES_TYPE_MAP[desc["name"]] = "(uctypes.PTR | %d, uctypes.VOID)"
             print("# typedef func-ptr %s" % desc["name"])
         else:
             print(desc)
