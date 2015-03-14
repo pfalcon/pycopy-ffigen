@@ -44,6 +44,8 @@ def conv_uctypes_type(rec, offset):
     if rec["tag"] == ":pointer":
         if rec["type"]["tag"] == ":struct":
             return "(uctypes.PTR | %d, %s)" % (offset, rec["type"]["name"])
+        elif rec["type"]["tag"] == ":pointer":
+            return "(uctypes.PTR | %d, %s)" % (offset, "uctypes.VOID")
         else:
             if rec["type"]["tag"] not in UCTYPES_TYPE_MAP:
                 assert 0, rec
