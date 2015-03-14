@@ -24,6 +24,7 @@ UCTYPES_TYPE_MAP = {
     ":enum": "uctypes.INT32",
     "uint8_t": "uctypes.UINT8",
     "uint16_t": "uctypes.UINT16",
+    "uint32_t": "uctypes.UINT32",
 }
 
 def conv_ffi_type(rec):
