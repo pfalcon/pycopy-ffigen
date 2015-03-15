@@ -51,6 +51,8 @@ def conv_uctypes_type(rec, offset):
             if rec["type"]["tag"] not in UCTYPES_TYPE_MAP:
                 assert 0, rec
             return "(uctypes.PTR | %d, %s)" % (offset, UCTYPES_TYPE_MAP[rec["type"]["tag"]])
+    if rec["tag"] == ":array":
+        return "(uctypes.ARRAY | %d, %d, %s)" % (offset, rec["size"], UCTYPES_TYPE_MAP[rec["type"]["tag"]])
     assert 0, rec["tag"]
 
 
