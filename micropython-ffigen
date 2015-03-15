@@ -17,6 +17,7 @@ FFI_TYPE_MAP = {
 
 UCTYPES_TYPE_MAP = {
     ":void": "uctypes.VOID",
+    ":char": "uctypes.INT8",
     ":unsigned-char": "uctypes.UINT8",
     ":short": "uctypes.INT16",
     ":int": "uctypes.INT32",
