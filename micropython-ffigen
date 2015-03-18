@@ -9,6 +9,7 @@ FFI_TYPE_MAP = {
     ":unsigned-char": "B",
     ":short": "h",
     ":unsigned-int": "I",
+    ":enum": "i",
     "uint8_t": "B",
     "uint16_t": "H",
     "uint32_t": "I",
