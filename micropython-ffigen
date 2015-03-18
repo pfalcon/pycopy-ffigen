@@ -96,14 +96,15 @@ for desc in data:
         if desc["type"]["tag"] == ":struct":
             FFI_TYPE_MAP[desc["name"]] = desc["type"]["name"]
             UCTYPES_TYPE_MAP[desc["name"]] = desc["type"]["name"]
-            print("# typedef %s" % desc["name"])
+            print("# typedef struct %s" % desc["name"])
         elif desc["type"]["tag"] == ":function-pointer":
             FFI_TYPE_MAP[desc["name"]] = "C"
             UCTYPES_TYPE_MAP[desc["name"]] = "(uctypes.PTR | %d, uctypes.VOID)"
             print("# typedef func-ptr %s" % desc["name"])
         else:
-            print(desc)
-            assert 0, desc["tag"]
+            FFI_TYPE_MAP[desc["name"]] = FFI_TYPE_MAP[desc["type"]["tag"]]
+            UCTYPES_TYPE_MAP[desc["name"]] = UCTYPES_TYPE_MAP[desc["type"]["tag"]]
+            print("# typedef %s" % desc["name"])
     else:
         print(desc)
         assert 0, desc["tag"]
