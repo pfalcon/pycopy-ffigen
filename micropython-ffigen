@@ -60,6 +60,27 @@ def conv_uctypes_type(rec, offset):
     assert 0, rec["tag"]
 
 
+def handle_typedef(desc):
+    if desc["type"]["tag"] == ":struct":
+        FFI_TYPE_MAP[desc["name"]] = desc["type"]["name"]
+        UCTYPES_TYPE_MAP[desc["name"]] = desc["type"]["name"]
+        print("# typedef struct %s" % desc["name"])
+    elif desc["type"]["tag"] == ":pointer":
+        FFI_TYPE_MAP[desc["name"]] = "p"
+        # TODO
+        UCTYPES_TYPE_MAP[desc["name"]] = "(uctypes.PTR | %d, uctypes.VOID)"
+        print("# typedef ptr %s" % desc["name"])
+    elif desc["type"]["tag"] == ":function-pointer":
+        FFI_TYPE_MAP[desc["name"]] = "C"
+        UCTYPES_TYPE_MAP[desc["name"]] = "(uctypes.PTR | %d, uctypes.VOID)"
+        print("# typedef func-ptr %s" % desc["name"])
+    else:
+        FFI_TYPE_MAP[desc["name"]] = FFI_TYPE_MAP[desc["type"]["tag"]]
+        UCTYPES_TYPE_MAP[desc["name"]] = UCTYPES_TYPE_MAP[desc["type"]["tag"]]
+        print("# typedef %s" % desc["name"])
+
+
+
 with open(sys.argv[1]) as f:
     proj = json.load(f)
 
@@ -110,23 +131,7 @@ for desc in data:
 #        print(desc)
         print("}")
     elif desc["tag"] == "typedef":
-        if desc["type"]["tag"] == ":struct":
-            FFI_TYPE_MAP[desc["name"]] = desc["type"]["name"]
-            UCTYPES_TYPE_MAP[desc["name"]] = desc["type"]["name"]
-            print("# typedef struct %s" % desc["name"])
-        elif desc["type"]["tag"] == ":pointer":
-            FFI_TYPE_MAP[desc["name"]] = "p"
-            # TODO
-            UCTYPES_TYPE_MAP[desc["name"]] = "(uctypes.PTR | %d, uctypes.VOID)"
-            print("# typedef ptr %s" % desc["name"])
-        elif desc["type"]["tag"] == ":function-pointer":
-            FFI_TYPE_MAP[desc["name"]] = "C"
-            UCTYPES_TYPE_MAP[desc["name"]] = "(uctypes.PTR | %d, uctypes.VOID)"
-            print("# typedef func-ptr %s" % desc["name"])
-        else:
-            FFI_TYPE_MAP[desc["name"]] = FFI_TYPE_MAP[desc["type"]["tag"]]
-            UCTYPES_TYPE_MAP[desc["name"]] = UCTYPES_TYPE_MAP[desc["type"]["tag"]]
-            print("# typedef %s" % desc["name"])
+        handle_typedef(desc)
     else:
         print(desc)
         assert 0, desc["tag"]
