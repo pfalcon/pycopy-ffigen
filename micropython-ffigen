@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import json
+import re
 
 
 FFI_TYPE_MAP = {
@@ -57,19 +58,33 @@ def conv_uctypes_type(rec, offset):
     assert 0, rec["tag"]
 
 
-f = open(sys.argv[1])
-data = json.load(f)
+with open(sys.argv[1]) as f:
+    proj = json.load(f)
+
+with open(sys.argv[2]) as f:
+    data = json.load(f)
 
 print("import ffi")
 print("import uctypes")
 print()
-print('l = ffi.open("libusb-1.0.so.0")')
+print('l = ffi.open("%s")' % proj["lib"])
 print()
 
 
 for desc in data:
-    if not desc["location"].startswith("libusb.h:"):
+    loc = desc["location"]
+    process = False
+    if "include" in proj:
+        for pat in proj["include"]:
+            if re.search(pat, loc):
+                process = True
+                break
+
+    if not process:
+        print("Ignoring %s" % loc)
         continue
+    print("Processing %s" % loc)
+
     if desc["tag"] == "function":
         params = [conv_ffi_type(x["type"]) for x in desc["parameters"]]
         s = '%s = l.func(%r, "%s", %r)' % (desc["name"], conv_ffi_type(desc["return-type"]), desc["name"], "".join(params))
