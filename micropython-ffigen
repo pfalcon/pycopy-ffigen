@@ -110,7 +110,7 @@ for desc in data:
 
     if desc["tag"] == "function":
         params = [conv_ffi_type(x["type"]) for x in desc["parameters"]]
-        s = '%s = l.func(%r, "%s", %r)' % (desc["name"], conv_ffi_type(desc["return-type"]), desc["name"], "".join(params))
+        s = '%s = l.func("%s", "%s", "%s")' % (desc["name"], conv_ffi_type(desc["return-type"]), desc["name"], "".join(params))
         if desc.get("inline", False):
             print("#%s" % s)
         else:
