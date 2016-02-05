@@ -79,7 +79,7 @@ def conv_uctypes_type(rec, offset):
     assert 0, rec["tag"]
 
 
-def handle_typedef(desc):
+def handle_typedef(desc, should_output=False):
     if desc["type"]["tag"] == ":struct":
         FFI_TYPE_MAP[desc["name"]] = desc["type"]["name"]
         UCTYPES_TYPE_MAP[desc["name"]] = desc["type"]["name"]
@@ -122,6 +122,12 @@ for desc in data:
                 process = True
                 break
 
+    # We need to collect all types for future references
+    if desc["tag"] == "typedef":
+#        print("Processing %s" % loc)
+        handle_typedef(desc, process)
+        continue
+
     if not process:
         print("Ignoring %s" % loc)
         continue
@@ -149,8 +155,6 @@ for desc in data:
             pass
 #        print(desc)
         print("}")
-    elif desc["tag"] == "typedef":
-        handle_typedef(desc)
     else:
         print(desc)
         assert 0, desc["tag"]
