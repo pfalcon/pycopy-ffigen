@@ -103,6 +103,10 @@ def handle_typedef(desc, should_output=False):
         print("# typedef %s" % desc["name"])
 
 
+if len(sys.argv) < 3 or len(sys.argv) > 4:
+    print("usage: %s <proj>.json <c2ffi>.json [<c2ffi-macro>.h]" % sys.argv[0])
+    sys.exit(1)
+
 
 with open(sys.argv[1]) as f:
     proj = json.load(f)
