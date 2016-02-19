@@ -51,6 +51,17 @@ UCTYPES_TYPE_MAP = {
     "uint32_t": "uctypes.UINT32",
 }
 
+
+def matches_filters(loc, proj):
+    process = False
+    if "include" in proj:
+        for pat in proj["include"]:
+            if re.search(pat, loc):
+                process = True
+                break
+    return process
+
+
 def conv_ffi_type(rec):
     if rec["tag"] == ":pointer":
         return "p"
@@ -123,12 +134,7 @@ print()
 
 for desc in data:
     loc = desc["location"]
-    process = False
-    if "include" in proj:
-        for pat in proj["include"]:
-            if re.search(pat, loc):
-                process = True
-                break
+    process = matches_filters(loc, proj)
 
     # We need to collect all types for future references
     if desc["tag"] == "typedef":
@@ -167,3 +173,15 @@ for desc in data:
         print(desc)
         assert 0, desc["tag"]
         pass
+
+
+if len(sys.argv) > 3:
+    with open(sys.argv[3]) as f:
+        print("\n# Constants\n")
+        for l in f:
+            if l.startswith("/* "):
+                loc = l[3:-4]
+            elif l.startswith("#define "):
+                if matches_filters(loc, proj):
+                    _, name, val = l.rstrip().split(" ", 2)
+                    print("%s = %s" % (name, val))
