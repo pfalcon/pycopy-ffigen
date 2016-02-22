@@ -178,10 +178,16 @@ for desc in data:
 if len(sys.argv) > 3:
     with open(sys.argv[3]) as f:
         print("\n# Constants\n")
+        items = []
         for l in f:
             if l.startswith("/* "):
                 loc = l[3:-4]
             elif l.startswith("#define "):
                 if matches_filters(loc, proj):
                     _, name, val = l.rstrip().split(" ", 2)
-                    print("%s = %s" % (name, val))
+                    loc = loc.split(":")
+                    items.append((loc[0], int(loc[1]), name, val))
+        items.sort()
+        for fname, line, name, val in items:
+            #print("#%s:%s" % (fname, line))
+            print("%s = %s" % (name, val))
