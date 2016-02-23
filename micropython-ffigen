@@ -4,6 +4,8 @@ import json
 import re
 
 
+comment_level = 0
+
 FFI_TYPE_MAP = {
     ":void": "v",
     ":int": "i",
@@ -94,24 +96,29 @@ def handle_typedef(desc, should_output=False):
     if desc["type"]["tag"] in (":struct", "struct"):
         FFI_TYPE_MAP[desc["name"]] = desc["type"]["name"]
         UCTYPES_TYPE_MAP[desc["name"]] = desc["type"]["name"]
-        print("# typedef struct %s" % desc["name"])
+        if comment_level > 1:
+            print("# typedef struct %s" % desc["name"])
     elif desc["type"]["tag"] in (":union", "union"):
         FFI_TYPE_MAP[desc["name"]] = desc["type"]["name"]
         UCTYPES_TYPE_MAP[desc["name"]] = desc["type"]["name"]
-        print("# typedef union %s" % desc["name"])
+        if comment_level > 1:
+            print("# typedef union %s" % desc["name"])
     elif desc["type"]["tag"] == ":pointer":
         FFI_TYPE_MAP[desc["name"]] = "p"
         # TODO
         UCTYPES_TYPE_MAP[desc["name"]] = "(uctypes.PTR | %d, uctypes.VOID)"
-        print("# typedef ptr %s" % desc["name"])
+        if comment_level > 1:
+            print("# typedef ptr %s" % desc["name"])
     elif desc["type"]["tag"] == ":function-pointer":
         FFI_TYPE_MAP[desc["name"]] = "C"
         UCTYPES_TYPE_MAP[desc["name"]] = "(uctypes.PTR | %d, uctypes.VOID)"
-        print("# typedef func-ptr %s" % desc["name"])
+        if comment_level > 1:
+            print("# typedef func-ptr %s" % desc["name"])
     else:
         FFI_TYPE_MAP[desc["name"]] = FFI_TYPE_MAP[desc["type"]["tag"]]
         UCTYPES_TYPE_MAP[desc["name"]] = UCTYPES_TYPE_MAP[desc["type"]["tag"]]
-        print("# typedef %s" % desc["name"])
+        if comment_level > 1:
+            print("# typedef %s" % desc["name"])
 
 
 if len(sys.argv) < 3 or len(sys.argv) > 4:
@@ -143,9 +150,11 @@ for desc in data:
         continue
 
     if not process:
-        print("Ignoring %s" % loc)
+        if comment_level > 0:
+            print("# Ignoring %s" % loc)
         continue
-    print("Processing %s" % loc)
+    if comment_level > 0:
+        print("# Processing %s" % loc)
 
     if desc["tag"] == "function":
         params = [conv_ffi_type(x["type"]) for x in desc["parameters"]]
