@@ -67,6 +67,8 @@ def matches_filters(loc, proj):
 def conv_ffi_type(rec):
     if rec["tag"] == ":pointer":
         return "p"
+    if rec["tag"] == ":array":
+        return "p"
     if rec["tag"] in FFI_TYPE_MAP:
         return FFI_TYPE_MAP[rec["tag"]]
     assert 0, rec["tag"]
@@ -88,7 +90,14 @@ def conv_uctypes_type(rec, offset):
                 assert 0, rec
             return "(uctypes.PTR | %d, %s)" % (offset, UCTYPES_TYPE_MAP[rec["type"]["tag"]])
     if rec["tag"] == ":array":
+        if rec["type"]["tag"] == ":function-pointer":
+            return "(uctypes.ARRAY | %d, %d, (uctypes.PTR,))  # TODO: array of func-ptr" % \
+                (offset, rec["size"])
         return "(uctypes.ARRAY | %d, %d, %s)" % (offset, rec["size"], UCTYPES_TYPE_MAP[rec["type"]["tag"]])
+    if rec["tag"] == ":function-pointer":
+            return "(uctypes.PTR | %d, %s)  # TODO: func-ptr" % (offset, "uctypes.VOID")
+    if rec["tag"] == "union":
+        return "# TODO: union"
     assert 0, rec["tag"]
 
 
